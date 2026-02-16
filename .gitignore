@@ -1,0 +1,49 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+
+# Environment variables (keep .env.example for reference)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache
+.parcel-cache
+
+#Claude AI
+.claude_cache
+.claude_temp
+.claude_sessions
+.claude_logs
+.claude_config
+.claude_tokens
+.claude_history
+claude.*
+
+# Docs
+docs/
+
+# Tests
+tests/
+test-results/
+
+# Playwright
+.playwright-mcp/
