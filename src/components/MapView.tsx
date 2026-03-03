@@ -1,0 +1,261 @@
+/**
+ * MapView Component
+ * Page wrapper for the Wayfinder map with navigation controls
+ */
+
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useKioskStore } from '@/store/kioskStore';
+import { WayfinderMap } from './WayfinderMap';
+import { wayfinderService } from '@/services';
+import { parseFloorId } from '@/utils/floorParser';
+
+/**
+ * Hook to get floor name from SDK with fallback to regex parsing
+ * Tries SDK cache first (sync), then fetches async, falls back to parser
+ */
+function useFloorName(floorId: string | undefined): string {
+  // Initial value: try sync cache first, fallback to parser
+  const [floorName, setFloorName] = useState<string>(() => {
+    if (!floorId) return 'Unknown Location';
+    // Try sync lookup first (uses cached SDK data if available)
+    const cached = wayfinderService.getFloorNameSync(floorId);
+    return cached ?? parseFloorId(floorId);
+  });
+
+  useEffect(() => {
+    if (!floorId) {
+      setFloorName('Unknown Location');
+      return;
+    }
+
+    // Fetch from SDK (will use cache if available, or build it)
+    wayfinderService.getFloorName(floorId).then((name) => {
+      setFloorName(name);
+    });
+  }, [floorId]);
+
+  return floorName;
+}
+
+export const MapView: React.FC = () => {
+  const { t } = useTranslation();
+  const selectedPOI = useKioskStore((state) => state.selectedPOI);
+  const setView = useKioskStore((state) => state.setView);
+  const setMapVisible = useKioskStore((state) => state.setMapVisible);
+  const selectPOI = useKioskStore((state) => state.selectPOI);
+  const setQrCodeUrl = useKioskStore((state) => state.setQrCodeUrl);
+  const setFlightSearchQuery = useKioskStore((state) => state.setFlightSearchQuery);
+
+  // Get floor name from SDK with fallback to regex parsing
+  const floorName = useFloorName(selectedPOI?.floor);
+
+  const handleBack = async () => {
+    // Close any open QR code modal
+    setQrCodeUrl(null);
+
+    // Clear any flight search query
+    setFlightSearchQuery(null);
+
+    // Clear selected POI
+    selectPOI(null);
+
+    // Reset the map to initial state with full cleanup
+    await wayfinderService.resetToInitialState();
+
+    // Hide the map and navigate back to idle screen
+    setMapVisible(false);
+    setView('idle');
+  };
+
+  const handleClearRoute = async () => {
+    // Close any open QR code modal
+    setQrCodeUrl(null);
+
+    // Clear selected POI
+    selectPOI(null);
+
+    // Reset the map to initial state with full cleanup
+    await wayfinderService.resetToInitialState();
+
+    // Hide the map and navigate back to directory
+    setMapVisible(false);
+    setView('directory');
+  };
+
+  const handleMapReady = () => {
+    // Map is ready - navigation will be handled by WayfinderMap
+  };
+
+  const handleMapError = (error: Error) => {
+    console.error('Map error:', error);
+    // Could dispatch to error tracking service here
+  };
+
+  return (
+    <div className="w-screen h-screen flex flex-col bg-gray-900">
+      {/* Header */}
+      <header className="bg-blue-700 text-white shadow-lg z-10">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Back Button */}
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-500
+                       rounded-xl text-xl font-semibold transition-all
+                       active:scale-95 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+            aria-label="Go back to previous screen"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            {t('common.back')}
+          </button>
+
+          {/* Title */}
+          <h1 className="text-3xl font-bold flex-1 text-center">
+            {selectedPOI ? (
+              <span className="flex items-center justify-center gap-3">
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {selectedPOI.name}
+              </span>
+            ) : (
+              t('map.title')
+            )}
+          </h1>
+
+          {/* Clear Route Button or Spacer */}
+          {selectedPOI ? (
+            <button
+              onClick={handleClearRoute}
+              className="flex items-center gap-3 px-6 py-3 bg-red-600 hover:bg-red-500
+                         rounded-xl text-xl font-semibold transition-all
+                         active:scale-95 focus:outline-none focus:ring-4 focus:ring-yellow-400"
+              aria-label="Clear route and return to directory"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              {t('map.clearRoute')}
+            </button>
+          ) : (
+            <div className="w-[140px]" /> /* Spacer to center title */
+          )}
+        </div>
+
+        {/* Location details if POI is selected */}
+        {selectedPOI && (
+          <div className="px-6 pb-4 border-t border-blue-600 pt-3">
+            <div className="flex items-center justify-center gap-6 text-blue-100">
+              <span className="flex items-center gap-2 text-lg">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                  />
+                </svg>
+                {floorName}
+              </span>
+              {selectedPOI.distanceMeters && (
+                <span className="flex items-center gap-2 text-lg">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
+                  {Math.round(selectedPOI.distanceMeters)} {t('common.metersAway')}
+                </span>
+              )}
+              <span className="flex items-center gap-2 text-lg capitalize">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                  />
+                </svg>
+                {selectedPOI.category}
+              </span>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Map Container */}
+      <main className="flex-1 relative">
+        <WayfinderMap
+          className="h-full"
+          showNavigation={!!selectedPOI}
+          onMapReady={handleMapReady}
+          onError={handleMapError}
+        />
+      </main>
+    </div>
+  );
+};
+
+export default MapView;
