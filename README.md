@@ -5,12 +5,14 @@ An interactive wayfinding system for airport terminals. Helps travelers navigate
 ## Features
 
 ### Navigation & Wayfinding
+
 - **Interactive Floor Maps** - Visual navigation with real-time routing to destinations
 - **Directory** - Browse shops, restaurants, and relaxation areas by floor and category
 - **Gate Finder** - Look up flight gates and get turn-by-turn directions
 - **Search** - Find specific locations by name, category, or keyword
 
 ### Accessibility
+
 - **High Contrast Mode** - WCAG AAA compliant color palette (21:1 contrast ratio)
 - **Large Text** - Text scaling up to 200% for improved readability
 - **Audio Feedback** - Optional sound effects for all interactions
@@ -18,10 +20,12 @@ An interactive wayfinding system for airport terminals. Helps travelers navigate
 - **Keyboard Navigation** - Complete keyboard support without requiring a mouse
 
 ### Internationalization
+
 - English, Spanish, and French support
 - Automatic language detection with manual override
 
 ### Kiosk Mode
+
 - Electron-based deployment for controlled kiosk environments
 - Fullscreen lockdown with keyboard shortcut blocking
 - Auto-recovery from errors with automatic reloads
@@ -29,6 +33,7 @@ An interactive wayfinding system for airport terminals. Helps travelers navigate
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm
 
@@ -90,6 +95,7 @@ public/               # Static assets and audio files
 ### State Management
 
 Uses Zustand for global state including:
+
 - Current view (idle, directory, map, gate finder)
 - Selected POI and navigation state
 - Language and accessibility preferences
@@ -102,12 +108,14 @@ Uses Zustand for global state including:
 Copy `.env.example` to `.env` and fill in your values. Do not commit `.env` to version control.
 
 **Wayfinder SDK Credentials:**
+
 ```
 VITE_WAYFINDER_ACCOUNT_ID=your_account_id
 VITE_WAYFINDER_VENUE_ID=your_venue_id
 ```
 
 **Kiosk Location:**
+
 ```
 VITE_KIOSK_PIN_TITLE=You Are Here
 VITE_KIOSK_LATITUDE=your_latitude
@@ -117,28 +125,33 @@ VITE_KIOSK_STRUCTURE_ID=your_structure_id
 ```
 
 **Map QR Code:**
+
 ```
 VITE_MAP_QR_BASE_URL=https://your-venue.maps.atrius.com/
 ```
 
 **Optional Flight Status Integration:**
+
 ```
 VITE_FLIGHT_STATUS_ENABLED=false
 VITE_FLIGHT_STATUS_API_KEY=
 ```
 
 **POI Categories** (customizable quick actions on map):
+
 ```
 VITE_POI_CATEGORIES={"poiCategories":[...]}
 ```
 
 **Application Settings:**
+
 ```
 VITE_INACTIVITY_TIMEOUT=60000
 VITE_APP_NAME=Atrius Airport
 ```
 
 **Map Reset Configuration (Optional):**
+
 ```
 VITE_INITIAL_MAP_STATE=  # Captured state for consistent resets
 ```
@@ -185,12 +198,14 @@ Complies with WCAG 2.2 AA/AAA standards:
 ### Common Issues
 
 **Dev server port conflicts:**
+
 ```bash
 pkill -f "vite" 2>/dev/null
 npm run dev
 ```
 
 **TypeScript errors:**
+
 ```bash
 npm run type-check
 ```
@@ -211,9 +226,3 @@ The Wayfinder map SDK can only be initialized once. The MapView component stays 
 - **Gate Finder** - Service layer ready, UI completion in progress
 - **Translations** - Framework ready, full localization pending
 - **Electron Deployment** - Configured and ready for testing
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-The MIT License allows customers and partners to freely use, modify, and distribute this software in their own implementations, both open-source and commercial, with minimal restrictions. See [MIT License](https://opensource.org/licenses/MIT) for full terms.
