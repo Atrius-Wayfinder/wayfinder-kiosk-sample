@@ -3,12 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '@/store/kioskStore';
 import { useKeyboard, useKeyboardInput } from '@/context/KeyboardContext';
 import { audioService, directoryService, type SecurityWaitTime } from '@/services';
+import airportBackdrop from '@/assets/Airportbackdrop.png';
+import airportInterior from '@/assets/AirportInterior.png';
+import airportTarmac from '@/assets/AirportTarmac.png';
 
 // Background images to cycle through
 const BACKGROUND_IMAGES = [
-  '/assets/Airportbackdrop.png',
-  '/assets/AirportInterior.png',
-  '/assets/AirportTarmac.png',
+  airportBackdrop,
+  airportInterior,
+  airportTarmac,
 ];
 
 const CYCLE_INTERVAL = 8000; // 8 seconds between transitions

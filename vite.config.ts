@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { VitePWA } from "vite-plugin-pwa";
+import path from "path";
 
 export default defineConfig(({ mode }) => ({
+  base: "./",
   plugins: [
     react(),
     tailwindcss(),
@@ -13,14 +14,14 @@ export default defineConfig(({ mode }) => ({
       devOptions: {
         enabled: false,
       },
-      registerType: 'autoUpdate',
+      registerType: "autoUpdate",
       workbox: {
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/maps\.locuslabs\.com\/.*/,
-            handler: 'StaleWhileRevalidate',
+            handler: "StaleWhileRevalidate",
             options: {
-              cacheName: 'locuslabs-maps-cache',
+              cacheName: "locuslabs-maps-cache",
               cacheableResponse: {
                 statuses: [0, 200],
               },
@@ -33,47 +34,47 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: 'Airport Wayfinder Kiosk',
-        short_name: 'Wayfinder',
-        description: 'Airport navigation and wayfinding kiosk application',
-        display: 'fullscreen',
-        orientation: 'landscape',
-        start_url: '/',
-        scope: '/',
-        theme_color: '#1f2937',
-        background_color: '#ffffff',
+        name: "Airport Wayfinder Kiosk",
+        short_name: "Wayfinder",
+        description: "Airport navigation and wayfinding kiosk application",
+        display: "fullscreen",
+        orientation: "landscape",
+        start_url: "/",
+        scope: "/",
+        theme_color: "#1f2937",
+        background_color: "#ffffff",
         icons: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any',
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
           },
           {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any',
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
           },
           {
-            src: '/pwa-maskable-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable',
+            src: "pwa-maskable-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable",
           },
           {
-            src: '/pwa-maskable-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
+            src: "pwa-maskable-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
         screenshots: [
           {
-            src: '/screenshot-wide.png',
-            sizes: '1280x720',
-            type: 'image/png',
-            form_factor: 'wide',
+            src: "screenshot-wide.png",
+            sizes: "1280x720",
+            type: "image/png",
+            form_factor: "wide",
           },
         ],
       },
@@ -81,7 +82,7 @@ export default defineConfig(({ mode }) => ({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
@@ -89,13 +90,13 @@ export default defineConfig(({ mode }) => ({
     host: true,
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: false,
-    minify: 'terser',
+    minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true,
       },
     },
   },
-}))
+}));

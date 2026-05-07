@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
+import symbolBlack from '@/assets/symbol-black.svg';
 
 interface QRCodeModalProps {
   url: string;
@@ -73,7 +74,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="bg-white rounded-full p-2 shadow-sm">
               <img
-                src="/assets/symbol-black.svg"
+                src={symbolBlack}
                 alt=""
                 className="w-10 h-12"
                 aria-hidden="true"
