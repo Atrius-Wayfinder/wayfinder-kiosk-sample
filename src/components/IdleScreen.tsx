@@ -94,7 +94,7 @@ const SecurityWaitTimes = memo(function SecurityWaitTimes() {
 
   return (
     <div
-      className="absolute top-8 right-8 bg-white/95 rounded-2xl shadow-xl p-4 min-w-[280px]"
+      className="absolute top-8 right-8 z-10 bg-white/95 rounded-2xl shadow-xl p-4 min-w-[280px] max-h-[calc(var(--app-h)-12rem)] overflow-y-auto"
       role="region"
       aria-label="Security checkpoint wait times"
     >
@@ -164,12 +164,14 @@ const SecurityWaitTimes = memo(function SecurityWaitTimes() {
 });
 
 export const IdleScreen: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const setView = useKioskStore((state) => state.setView);
   const setMapVisible = useKioskStore((state) => state.setMapVisible);
   const setFlightSearchQuery = useKioskStore((state) => state.setFlightSearchQuery);
-  const setLanguage = useKioskStore((state) => state.setLanguage);
-  const language = useKioskStore((state) => state.language);
+  const reachMode = useKioskStore((state) => !!state.userPreferences.accessibility.reachMode);
+  // Reach mode gives the idle screen two-thirds of the height, so the centre column is
+  // tightened to fit under the title instead of running into it.
+  const buttonHeight = reachMode ? 'min-h-[112px]' : 'min-h-[140px]';
 
   const [flightNumber, setFlightNumber] = useState('');
   const { isVisible: isKeyboardVisible } = useKeyboard();
@@ -223,19 +225,13 @@ export const IdleScreen: React.FC = () => {
     setMapVisible(true);
   };
 
-  const handleLanguageChange = (lang: 'en' | 'es' | 'fr') => {
-    audioService.click();
-    setLanguage(lang);
-    i18n.changeLanguage(lang);
-  };
-
   // Calculate dynamic padding for keyboard
   const keyboardPadding = useMemo(() => {
     return isKeyboardVisible ? 'pb-[300px]' : 'pb-0';
   }, [isKeyboardVisible]);
 
   return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center touch-none select-none relative overflow-hidden">
+    <div className="w-full h-[var(--app-h)] flex flex-col items-center justify-center touch-none select-none relative overflow-hidden">
       {/* Background image layers for crossfade effect */}
       {BACKGROUND_IMAGES.map((image, index) => (
         <div
@@ -271,10 +267,15 @@ export const IdleScreen: React.FC = () => {
       <SecurityWaitTimes />
 
       {/* Main Action Buttons */}
-      <main className={`flex flex-col gap-8 mt-16 transition-all duration-300 ${keyboardPadding} relative z-10`}>
+      {/*
+        shrink-0: <main> is a flex item of a flex-col parent, so on a short viewport
+        it would otherwise be compressed below its content height, squashing the
+        buttons under their min-h.
+      */}
+      <main className={`flex flex-col shrink-0 ${reachMode ? 'gap-5' : 'gap-8'} mt-16 transition-all duration-300 ${keyboardPadding} relative z-10`}>
         <button
           onClick={handleExploreMap}
-          className="min-w-[400px] min-h-[140px] bg-white text-blue-700 text-4xl font-bold rounded-3xl shadow-2xl hover:bg-blue-50 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50"
+          className={`min-w-[400px] ${buttonHeight} bg-white text-blue-700 text-4xl font-bold rounded-3xl shadow-2xl hover:bg-blue-50 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50`}
           aria-label={t('idle.findGate')}
         >
           <span className="flex items-center justify-center gap-4">
@@ -298,7 +299,7 @@ export const IdleScreen: React.FC = () => {
 
         <button
           onClick={handleDirectory}
-          className="min-w-[400px] min-h-[140px] bg-white/90 text-blue-700 text-4xl font-bold rounded-3xl shadow-2xl hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50"
+          className={`min-w-[400px] ${buttonHeight} bg-white/90 text-blue-700 text-4xl font-bold rounded-3xl shadow-2xl hover:bg-white hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/50`}
           aria-label={t('idle.directory')}
         >
           <span className="flex items-center justify-center gap-4">
@@ -321,7 +322,7 @@ export const IdleScreen: React.FC = () => {
         </button>
 
         {/* Flight Search Box */}
-        <form onSubmit={handleFlightSearch} className="mt-8">
+        <form onSubmit={handleFlightSearch} className={reachMode ? 'mt-4' : 'mt-8'}>
           <label htmlFor="flight-search" className="text-xl text-white mb-2 block text-center drop-shadow-md">
             {t('gateFinder.flightEntry')}
           </label>
@@ -348,28 +349,14 @@ export const IdleScreen: React.FC = () => {
       </main>
 
       {/* Language Selector and Touch Prompt */}
-      <footer className="absolute bottom-8 flex flex-col items-center gap-4 z-10">
-        <div className="flex gap-4">
-          {(['en', 'es', 'fr'] as const).map((lang) => (
-            <button
-              key={lang}
-              onClick={() => handleLanguageChange(lang)}
-              className={`px-6 py-3 rounded-lg text-xl font-semibold transition-all ${
-                language === lang
-                  ? 'bg-white text-blue-700 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-              aria-pressed={language === lang}
-              aria-label={`Switch language to ${lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : 'French'}`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-        <div className="text-white/80 text-xl animate-pulse mt-4 drop-shadow-md">
+
+      {/* Attract prompt - hidden in reach mode, where the user is already engaged and
+          the centre column has no spare height. */}
+      {!reachMode && (
+        <footer className="absolute bottom-8 z-10 text-white/80 text-xl animate-pulse drop-shadow-md">
           {t('idle.touchPrompt')}
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };

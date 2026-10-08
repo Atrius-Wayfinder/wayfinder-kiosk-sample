@@ -7,8 +7,6 @@
 
 import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { useKioskStore } from '@/store/kioskStore';
 import { directoryService, audioService, wayfinderService, DirectoryPOI } from '@/services';
 import { parseFloorId } from '@/utils/floorParser';
@@ -38,37 +36,6 @@ function useFloorName(floorId: string | undefined): string {
 }
 
 type TabType = 'shop' | 'dine' | 'relax';
-
-// Virtualization constants
-const ROW_HEIGHT = 364; // Card height (340px) + gap (24px)
-
-/**
- * Calculate column count based on container width
- * Matches Tailwind breakpoints: 1 col (default), 2 col (md: 768px), 3 col (lg: 1024px)
- */
-function getColumnCount(width: number): number {
-  if (width >= 1024) return 3;
-  if (width >= 768) return 2;
-  return 1;
-}
-
-/**
- * Custom props passed to each virtual row via rowProps
- */
-interface VirtualRowCustomProps {
-  items: DirectoryPOI[];
-  columnCount: number;
-  onSelect: (poi: DirectoryPOI) => void;
-  t: (key: string, options?: Record<string, unknown>) => string;
-}
-
-/**
- * Full props for virtual row (custom props + react-window injected props)
- */
-interface VirtualRowProps extends VirtualRowCustomProps {
-  index: number;
-  style: React.CSSProperties;
-}
 
 // Map UI tab names to POI category names
 const TAB_CATEGORY_MAP: Record<TabType, POI['category']> = {
@@ -178,46 +145,6 @@ const POICard = memo(function POICard({ poi, onSelect, walkingTimeText }: POICar
         )}
       </div>
     </button>
-  );
-});
-
-/**
- * Virtual Row Component
- * Renders a row of POI cards for virtualized list
- * Each row contains 1-3 cards depending on screen width
- */
-const VirtualRow = memo(function VirtualRow({
-  index,
-  style,
-  items,
-  columnCount,
-  onSelect,
-  t,
-}: VirtualRowProps) {
-  const startIndex = index * columnCount;
-  const rowItems = items.slice(startIndex, startIndex + columnCount);
-
-  return (
-    <div style={style} className="flex gap-6 px-0.5">
-      {rowItems.map((poi: DirectoryPOI) => {
-        const walkingMinutes = poi.distanceFromKiosk
-          ? getWalkingTimeMinutes(poi.distanceFromKiosk)
-          : null;
-        const walkingTimeText = walkingMinutes
-          ? t('directory.walkTime', { minutes: walkingMinutes })
-          : null;
-        return (
-          <div key={poi.poiId} className="flex-1 min-w-0">
-            <POICard poi={poi} onSelect={onSelect} walkingTimeText={walkingTimeText} />
-          </div>
-        );
-      })}
-      {/* Fill empty slots to maintain grid alignment */}
-      {rowItems.length < columnCount &&
-        Array.from({ length: columnCount - rowItems.length }).map((_, i) => (
-          <div key={`empty-${i}`} className="flex-1 min-w-0" />
-        ))}
-    </div>
   );
 });
 
@@ -377,7 +304,7 @@ export default function Directory() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-[var(--app-h)] bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -581,32 +508,27 @@ export default function Directory() {
           </div>
         )}
 
-        {/* POI Grid - Virtualized */}
+        {/* POI Grid */}
         {!isLoadingPOIs && !error && filteredPOIs.length > 0 && (
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <AutoSizer>
-              {({ height, width }) => {
-                const columnCount = getColumnCount(width);
-                const rowCount = Math.ceil(filteredPOIs.length / columnCount);
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+              {filteredPOIs.map((poi) => {
+                const walkingMinutes = poi.distanceFromKiosk
+                  ? getWalkingTimeMinutes(poi.distanceFromKiosk)
+                  : null;
+                const walkingTimeText = walkingMinutes
+                  ? t('directory.walkTime', { minutes: walkingMinutes })
+                  : null;
                 return (
-                  <div style={{ height, width }}>
-                    <List<VirtualRowCustomProps>
-                      rowCount={rowCount}
-                      rowHeight={ROW_HEIGHT}
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      rowComponent={VirtualRow as any}
-                      rowProps={{
-                        items: filteredPOIs,
-                        columnCount,
-                        onSelect: handlePOIClick,
-                        t,
-                      }}
-                      style={{ height, width }}
-                    />
-                  </div>
+                  <POICard
+                    key={poi.poiId}
+                    poi={poi}
+                    onSelect={handlePOIClick}
+                    walkingTimeText={walkingTimeText}
+                  />
                 );
-              }}
-            </AutoSizer>
+              })}
+            </div>
           </div>
         )}
       </main>
@@ -621,7 +543,7 @@ export default function Directory() {
           }}
         >
           <div
-            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl max-h-[calc(var(--app-h)*0.9)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Detail Header */}
@@ -697,13 +619,19 @@ export default function Directory() {
                 </p>
               </div>
 
-              {/* Get Directions Button */}
-              <button
-                onClick={handleGetDirections}
-                className="w-full mt-6 h-14 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
-              >
-                {t('directory.getDirections')}
-              </button>
+              {/*
+                Get Directions Button - sticky footer, so the panel's primary action is
+                always visible. In reach mode the panel is a third shorter and this
+                button otherwise fell below the bottom edge of the screen.
+              */}
+              <div className="sticky bottom-0 -mx-6 -mb-6 mt-6 px-6 pt-4 pb-6 bg-white">
+                <button
+                  onClick={handleGetDirections}
+                  className="w-full h-14 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
+                >
+                  {t('directory.getDirections')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

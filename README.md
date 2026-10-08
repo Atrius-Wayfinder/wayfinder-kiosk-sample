@@ -16,6 +16,12 @@ An interactive wayfinding system for airport terminals. Helps travelers navigate
 - **High Contrast Mode** - WCAG AAA compliant color palette (21:1 contrast ratio)
 - **Large Text** - Text scaling up to 200% for improved readability
 - **Audio Feedback** - Optional sound effects for all interactions
+- **Reach Mode** - For wheelchair and seated users. Compresses the whole interface into
+  the lower two-thirds of the screen so every control is within reach, and requests
+  step-free routes (no stairs or escalators) for directions and gate routing. The
+  freed top third shows `public/assets/ReachModePano.jpeg`, a placeholder for
+  advertising or venue content. Like the other accessibility settings, it resets
+  after the inactivity timeout so the next traveller starts from the default.
 - **Screen Reader Support** - Full semantic HTML and ARIA labels
 - **Keyboard Navigation** - Complete keyboard support without requiring a mouse
 
@@ -29,6 +35,22 @@ An interactive wayfinding system for airport terminals. Helps travelers navigate
 - Electron-based deployment for controlled kiosk environments
 - Fullscreen lockdown with keyboard shortcut blocking
 - Auto-recovery from errors with automatic reloads
+- **Tab rail** - compact translucent tabs on the right edge of every screen for
+  accessibility settings, language, and "take this map to your phone" (QR code, shown
+  while the map is open). Each tab slides out a drawer; tapping outside closes it. The
+  map's own right-hand controls are shifted left so the tabs never cover them.
+
+### URL Parameters
+
+Runtime behavior can be adjusted via URL query parameters without changing configuration files:
+
+| Parameter | Value | Effect |
+|---|---|---|
+| `keyboard` | `off` | Disables the on-screen virtual keyboard for the current session |
+
+**Example:** `http://localhost:5173/?keyboard=off`
+
+This is session-scoped — refreshing without the parameter re-enables the keyboard. Useful for deployments where a physical keyboard is attached, or for testing without the virtual keyboard overlay.
 
 ## Getting Started
 

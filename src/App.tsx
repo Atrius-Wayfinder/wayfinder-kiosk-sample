@@ -15,10 +15,9 @@ import IdleScreen from '@/components/IdleScreen';
 import GateFinder from '@/components/GateFinder';
 import Directory from '@/components/Directory';
 import MapView from '@/components/MapView';
-import AccessibilityToolbar from '@/components/AccessibilityToolbar';
-import TakeMapButton from '@/components/TakeMapButton';
+import TabRail from '@/components/TabRail';
 import VirtualKeyboard from '@/components/VirtualKeyboard';
-import { KeyboardProvider } from '@/context/KeyboardContext';
+import { KeyboardProvider, useKeyboard } from '@/context/KeyboardContext';
 
 /**
  * Renders the component for the current view
@@ -39,7 +38,8 @@ const CurrentView: React.FC<{ view: string }> = ({ view }) => {
  * Main application layout using state-based routing
  */
 const AppLayout: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { keyboardDisabled } = useKeyboard();
   const currentView = useKioskStore((state) => state.currentView);
   const isMapVisible = useKioskStore((state) => state.isMapVisible);
   const isOffline = useKioskStore((state) => state.isOffline);
@@ -70,6 +70,15 @@ const AppLayout: React.FC = () => {
     document.body.classList.toggle('large-text', userPreferences.accessibility.largeText);
   }, [userPreferences.accessibility.highContrast, userPreferences.accessibility.largeText]);
 
+  // Reach mode resizes the app root, but the map canvas only re-measures on a window
+  // resize - without this nudge it keeps drawing at its old height and is clipped.
+  const reachMode = !!userPreferences.accessibility.reachMode;
+  useEffect(() => {
+    document.body.classList.toggle('reach-mode', reachMode);
+    const frame = requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    return () => cancelAnimationFrame(frame);
+  }, [reachMode]);
+
   // Sync UI and map language with store language
   useEffect(() => {
     // Update i18next language for kiosk UI
@@ -82,7 +91,28 @@ const AppLayout: React.FC = () => {
   }, [userPreferences.language]);
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white">
+    <>
+    {/*
+      Reach mode: the top third is out of reach for interaction, so it becomes display
+      space. The pano is a placeholder showing venues the slot can carry advertising.
+      The status pill stays small and in a corner so it doesn't compete with the image.
+    */}
+    {reachMode && (
+      <div
+        className="fixed top-0 left-0 right-0 h-[33.333dvh] bg-cover bg-no-repeat"
+        style={{ backgroundImage: "url('/assets/ReachModePano.jpeg')", backgroundPosition: 'center 55%' }}
+      >
+        <div
+          className="absolute bottom-3 right-4 px-3 py-1.5 rounded-full bg-black/60 text-white text-sm backdrop-blur-sm"
+          role="status"
+        >
+          {t('accessibility.reachModeBanner')}
+        </div>
+      </div>
+    )}
+
+    {/* .reach-root is pinned to the lower two-thirds when reach mode is on (index.css) */}
+    <div className="reach-root w-full h-full overflow-hidden bg-white">
       {/* Offline indicator */}
       {isOffline && (
         <div className="fixed top-0 left-0 right-0 bg-red-600 text-white px-4 py-2 z-50 text-center">
@@ -104,15 +134,17 @@ const AppLayout: React.FC = () => {
         <MapView />
       </div>
 
-      {/* Take Map With You Button - shows QR code for mobile */}
-      <TakeMapButton />
-
-      {/* Accessibility Toolbar */}
-      <AccessibilityToolbar />
-
-      {/* Virtual Keyboard */}
-      <VirtualKeyboard />
+      {/* Right-edge tabs: accessibility, language, take-map-to-phone */}
+      <TabRail />
     </div>
+
+    {/*
+      Virtual Keyboard sits outside .reach-root on purpose: it positions itself from
+      viewport coordinates (getBoundingClientRect), which would be offset by a third
+      of the screen if reach mode made the root its containing block.
+    */}
+    {!keyboardDisabled && <VirtualKeyboard />}
+    </>
   );
 };
 

@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+/*
+ * Restore Tailwind display utilities over the map SDK's stylesheet.
+ *
+ * The LocusLabs SDK injects normalize.css at runtime as an unlayered <style> tag.
+ * Tailwind v4 puts its utilities in `@layer utilities`, and in the CSS cascade
+ * unlayered styles beat layered ones regardless of specificity or order - so
+ * normalize's `main { display: block }` silently overrides `.flex` on a <main>
+ * element. That collapsed the idle screen's button column into a side-by-side row,
+ * and only after the SDK finished loading, which made it look intermittent.
+ *
+ * These rules are unlayered too, so they compete with normalize on equal terms and
+ * win on specificity. Scoped to the element types normalize actually resets.
+ */
+main.flex,
+header.flex,
+footer.flex,
+section.flex,
+article.flex,
+nav.flex,
+aside.flex {
+  display: flex;
+}
+
+main.hidden,
+header.hidden,
+footer.hidden,
+section.hidden,
+article.hidden,
+nav.hidden,
+aside.hidden {
+  display: none;
+}
+
+main.grid,
+header.grid,
+footer.grid,
+section.grid,
+article.grid,
+nav.grid,
+aside.grid {
+  display: grid;
+}
+
 /* Kiosk-specific CSS */
 * {
   user-select: none;
@@ -183,4 +226,61 @@ body.large-text {
 }
 body.large-text button {
   font-size: 125%;
+}
+
+/*
+ * Reach mode (wheelchair / seated users)
+ *
+ * The whole app is compressed into the lower two-thirds of the screen, so nothing a
+ * traveller needs sits in the top third, out of reach from a seated position.
+ *
+ * --app-h is the height every full-screen view uses instead of 100vh (h-screen).
+ * The app root becomes a box pinned to the bottom of the screen, and the transform
+ * makes that box the containing block for `position: fixed` descendants - so modals,
+ * the POI detail panel and the QR dialog are confined to the reachable area without
+ * each one needing its own reach-mode styling. The transform is an identity, so it
+ * does not move or scale anything visually.
+ */
+:root {
+  --app-h: 100dvh;
+}
+
+body.reach-mode {
+  --app-h: 66.667dvh;
+  /* Shown in the top third, behind the banner. */
+  background-color: #1f2937;
+}
+
+body.reach-mode .reach-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--app-h);
+  transform: translateZ(0);
+}
+
+/*
+ * Tab rail (TabRail.tsx)
+ *
+ * Translucent tabs float over the right edge of every view. Anything that would sit
+ * under them is shifted left by the rail width instead:
+ *  - The map SDK renders its right-hand controls (level selector, recentre, compass,
+ *    pan, reset, zoom, menu) in one full-width absolute layer that is a direct child
+ *    of its <main>, next to SidebarWrapper. Shrinking that layer from the right moves
+ *    all of them clear of the tabs while the map canvas and left sidebar stay put.
+ *    Selected via the SDK's data-testid attributes, since its class names are hashed
+ *    per build.
+ *  - The idle screen's security wait-times panel.
+ */
+:root {
+  --rail-w: 64px;
+}
+
+main:has(> [data-testid='SidebarWrapper']) > div:has([data-testid='ZoomControl']) {
+  right: var(--rail-w) !important;
+}
+
+[aria-label='Security checkpoint wait times'] {
+  right: calc(var(--rail-w) + 1rem);
 }

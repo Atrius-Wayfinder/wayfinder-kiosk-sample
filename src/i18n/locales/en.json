@@ -1,6 +1,7 @@
 {
   "common": {
     "back": "Back",
+    "home": "Home",
     "close": "Close",
     "search": "Search",
     "loading": "Loading...",
@@ -47,7 +48,7 @@
   },
   "map": {
     "title": "Airport Map",
-    "clearRoute": "Clear Route",
+    "backToDirectory": "Back to Directory",
     "yourLocation": "You Are Here"
   },
   "qrCode": {
@@ -60,7 +61,9 @@
     "title": "Accessibility Options",
     "highContrast": "High Contrast",
     "largeText": "Large Text",
-    "audioFeedback": "Audio Feedback"
+    "audioFeedback": "Audio Feedback",
+    "reachMode": "Reach Mode",
+    "reachModeBanner": "Reach mode on · turn off in the ♿ Access tab"
   },
   "errors": {
     "mapLoadFailed": "Map Error",
@@ -77,5 +80,12 @@
     "backspace": "Backspace",
     "numbers": "Numbers",
     "letters": "Letters"
+  },
+  "rail": {
+    "access": "Access",
+    "phone": "Phone",
+    "phoneHint": "Scan to take this map with you",
+    "phoneNotConfigured": "Map link is not set up on this kiosk.",
+    "phoneError": "Couldn't create a link for this map."
   }
 }

@@ -167,12 +167,16 @@ export const WayfinderMap: React.FC<WayfinderMapProps> = ({
 
       const poiIdStr = selectedPOI.id;
       const kioskLocation = wayfinderService.getKioskLocation();
-      console.log('=== Calling showNavigation ===');
+      // Reach mode users are typically in a wheelchair, so route step-free (no stairs
+      // or escalators). Read at call time rather than as an effect dependency, so
+      // toggling reach mode does not re-fire an already-shown route.
+      const accessible = !!useKioskStore.getState().userPreferences.accessibility.reachMode;
+      console.log('=== Calling showNavigation ===', { accessible });
 
       try {
         const sdkMap = map as any;
         if (typeof sdkMap.showNavigation === 'function') {
-          sdkMap.showNavigation(kioskLocation, { poiId: poiIdStr }, false);
+          sdkMap.showNavigation(kioskLocation, { poiId: poiIdStr }, accessible);
           console.log('Direct call to `showNavigation` completed.');
         } else {
           console.error('`map.showNavigation()` is not a direct function.');
