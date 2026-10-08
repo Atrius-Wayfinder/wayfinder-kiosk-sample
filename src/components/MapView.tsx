@@ -68,7 +68,7 @@ export const MapView: React.FC = () => {
     setView('idle');
   };
 
-  const handleClearRoute = async () => {
+  const handleBackToDirectory = async () => {
     // Close any open QR code modal
     setQrCodeUrl(null);
 
@@ -93,17 +93,17 @@ export const MapView: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-gray-900">
+    <div className="w-full h-[var(--app-h)] flex flex-col bg-gray-900">
       {/* Header */}
       <header className="bg-blue-700 text-white shadow-lg z-10">
         <div className="flex items-center justify-between px-6 py-4">
-          {/* Back Button */}
+          {/* Home Button - always returns to the idle screen (see handleBack) */}
           <button
             onClick={handleBack}
             className="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-500
                        rounded-xl text-xl font-semibold transition-all
                        active:scale-95 focus:outline-none focus:ring-4 focus:ring-yellow-400"
-            aria-label="Go back to previous screen"
+            aria-label={t('common.home')}
           >
             <svg
               className="w-6 h-6"
@@ -116,10 +116,10 @@ export const MapView: React.FC = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M15 19l-7-7 7-7"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
               />
             </svg>
-            {t('common.back')}
+            {t('common.home')}
           </button>
 
           {/* Title */}
@@ -153,14 +153,17 @@ export const MapView: React.FC = () => {
             )}
           </h1>
 
-          {/* Clear Route Button or Spacer */}
+          {/* Back to Directory - shown when a route is displayed, which only the
+              Directory can start. Styled as navigation (like Back), not as a
+              destructive action: leaving does clear the route, but the user's intent
+              is to pick another place. */}
           {selectedPOI ? (
             <button
-              onClick={handleClearRoute}
-              className="flex items-center gap-3 px-6 py-3 bg-red-600 hover:bg-red-500
+              onClick={handleBackToDirectory}
+              className="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-500
                          rounded-xl text-xl font-semibold transition-all
                          active:scale-95 focus:outline-none focus:ring-4 focus:ring-yellow-400"
-              aria-label="Clear route and return to directory"
+              aria-label={t('map.backToDirectory')}
             >
               <svg
                 className="w-6 h-6"
@@ -173,10 +176,10 @@ export const MapView: React.FC = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                 />
               </svg>
-              {t('map.clearRoute')}
+              {t('map.backToDirectory')}
             </button>
           ) : (
             <div className="w-[140px]" /> /* Spacer to center title */

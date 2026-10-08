@@ -52,6 +52,7 @@ const defaultUserPreferences: UserPreferences = {
   accessibility: {
     highContrast: false,
     largeText: false,
+    reachMode: false,
   },
   audioEnabled: false,
 };

@@ -1,6 +1,7 @@
 {
   "common": {
     "back": "Atrás",
+    "home": "Inicio",
     "close": "Cerrar",
     "search": "Buscar",
     "loading": "Cargando...",
@@ -47,7 +48,7 @@
   },
   "map": {
     "title": "Mapa del Aeropuerto",
-    "clearRoute": "Borrar Ruta",
+    "backToDirectory": "Volver al Directorio",
     "yourLocation": "Estás Aquí"
   },
   "qrCode": {
@@ -60,7 +61,9 @@
     "title": "Opciones de Accesibilidad",
     "highContrast": "Alto Contraste",
     "largeText": "Texto Grande",
-    "audioFeedback": "Audio"
+    "audioFeedback": "Audio",
+    "reachMode": "Modo Alcance",
+    "reachModeBanner": "Modo alcance activado · desactívelo en la pestaña ♿ Acceso"
   },
   "errors": {
     "mapLoadFailed": "Error del Mapa",
@@ -77,5 +80,12 @@
     "backspace": "Retroceso",
     "numbers": "Números",
     "letters": "Letras"
+  },
+  "rail": {
+    "access": "Acceso",
+    "phone": "Móvil",
+    "phoneHint": "Escanee para llevarse este mapa",
+    "phoneNotConfigured": "El enlace del mapa no está configurado en este quiosco.",
+    "phoneError": "No se pudo crear un enlace para este mapa."
   }
 }

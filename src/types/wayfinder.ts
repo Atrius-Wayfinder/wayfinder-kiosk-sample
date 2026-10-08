@@ -37,6 +37,12 @@ export interface UserPreferences {
   accessibility: {
     highContrast: boolean;
     largeText: boolean;
+    /**
+     * Reach mode: compresses the UI into the lower two-thirds of the screen so a
+     * seated or wheelchair user can reach every control, and requests step-free
+     * routes by default.
+     */
+    reachMode: boolean;
   };
   audioEnabled: boolean;
 }

@@ -15,6 +15,11 @@ export function GateFinder() {
   // Store state
   const selectPOI = useKioskStore((state) => state.selectPOI);
   const setNavigating = useKioskStore((state) => state.setNavigating);
+  // Reach mode requests step-free routes (no stairs/escalators), which also makes the
+  // walking-time estimate reflect the accessible route.
+  const accessibleRoutes = useKioskStore(
+    (state) => !!state.userPreferences.accessibility.reachMode
+  );
   const setErrorMessage = useKioskStore((state) => state.setErrorMessage);
   const updateInteraction = useKioskStore((state) => state.updateInteraction);
   const reset = useKioskStore((state) => state.reset);
@@ -75,7 +80,7 @@ export function GateFinder() {
         return;
       }
 
-      const route = await gateFinderService.getRouteToGate(gateId);
+      const route = await gateFinderService.getRouteToGate(gateId, accessibleRoutes);
       const timeSeconds = route.eta || 0;
       setWalkingTime(gateFinderService.formatWalkingTime(timeSeconds));
     } catch (err) {
@@ -119,7 +124,7 @@ export function GateFinder() {
       selectPOI(poi);
       setNavigating(true);
 
-      await gateFinderService.showNavigationToGate(gateId);
+      await gateFinderService.showNavigationToGate(gateId, accessibleRoutes);
     } catch (err) {
       console.error('Error starting navigation:', err);
       setErrorMessage('Unable to start navigation. Please try again.');
@@ -139,7 +144,7 @@ export function GateFinder() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="flex flex-col h-[var(--app-h)] bg-gradient-to-br from-blue-50 to-blue-100">
       {/* Header */}
       <header className="bg-white shadow-md p-6">
         <div className="flex items-center justify-between max-w-7xl mx-auto">

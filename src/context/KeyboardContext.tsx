@@ -15,6 +15,7 @@ interface KeyboardContextType {
   isVisible: boolean;
   inputValue: string;
   keyboardPosition: KeyboardPosition;
+  keyboardDisabled: boolean;
   showKeyboard: (input: HTMLInputElement, value: string) => void;
   hideKeyboard: () => void;
   updateValue: (value: string) => void;
@@ -42,11 +43,17 @@ export function KeyboardProvider({ children }: { children: React.ReactNode }) {
   const [keyboardPosition, setKeyboardPosition] = useState<KeyboardPosition>({});
   const activeInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Read URL param once at mount — session-scoped, no persistence
+  const keyboardDisabled = useRef(
+    new URLSearchParams(window.location.search).get('keyboard') === 'off'
+  ).current;
+
   // Track if there was a recent user interaction (click/touch)
   // This helps distinguish user-initiated focus from programmatic focus
   const recentUserInteractionRef = useRef(false);
 
   const showKeyboard = useCallback((input: HTMLInputElement, value: string) => {
+    if (keyboardDisabled) return;
     activeInputRef.current = input;
     setInputValue(value);
 
@@ -163,6 +170,7 @@ export function KeyboardProvider({ children }: { children: React.ReactNode }) {
         isVisible,
         inputValue,
         keyboardPosition,
+        keyboardDisabled,
         showKeyboard,
         hideKeyboard,
         updateValue,

@@ -1,6 +1,7 @@
 {
   "common": {
     "back": "Retour",
+    "home": "Accueil",
     "close": "Fermer",
     "search": "Rechercher",
     "loading": "Chargement...",
@@ -47,7 +48,7 @@
   },
   "map": {
     "title": "Plan de l'Aéroport",
-    "clearRoute": "Effacer l'Itinéraire",
+    "backToDirectory": "Retour à l'Annuaire",
     "yourLocation": "Vous Êtes Ici"
   },
   "qrCode": {
@@ -60,7 +61,9 @@
     "title": "Options d'Accessibilité",
     "highContrast": "Contraste Élevé",
     "largeText": "Grand Texte",
-    "audioFeedback": "Audio"
+    "audioFeedback": "Audio",
+    "reachMode": "Mode Accessible",
+    "reachModeBanner": "Mode accessible activé · désactivez-le dans l'onglet ♿ Accès"
   },
   "errors": {
     "mapLoadFailed": "Erreur de Carte",
@@ -77,5 +80,12 @@
     "backspace": "Retour",
     "numbers": "Chiffres",
     "letters": "Lettres"
+  },
+  "rail": {
+    "access": "Accès",
+    "phone": "Mobile",
+    "phoneHint": "Scannez pour emporter cette carte",
+    "phoneNotConfigured": "Le lien de la carte n'est pas configuré sur cette borne.",
+    "phoneError": "Impossible de créer un lien pour cette carte."
   }
 }
