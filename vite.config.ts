@@ -39,8 +39,8 @@ export default defineConfig(({ mode }) => ({
         description: "Airport navigation and wayfinding kiosk application",
         display: "fullscreen",
         orientation: "landscape",
-        start_url: "/",
-        scope: "/",
+        start_url: "./",
+        scope: "./",
         theme_color: "#1f2937",
         background_color: "#ffffff",
         icons: [

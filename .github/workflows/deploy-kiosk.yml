@@ -1,0 +1,38 @@
+name: Deploy Kiosk
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    name: Deploy to https://experiences.atrius.com/kiosk/
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for OIDC token exchange
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        # Loads committed .env.prod (--mode prod); account ID comes from the pipeline
+        run: npm run build -- --mode prod
+        env:
+          VITE_WAYFINDER_ACCOUNT_ID: ${{ vars.KIOSK_WAYFINDER_ACCOUNT_ID }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.KIOSK_AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync to S3
+        run: aws s3 sync dist/ s3://${{ vars.KIOSK_S3_BUCKET }}/kiosk --delete
