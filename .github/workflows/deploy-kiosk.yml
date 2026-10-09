@@ -23,11 +23,10 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        # Loads committed .env.prod (--mode prod); account ID comes from the pipeline
+        run: npm run build -- --mode prod
         env:
           VITE_WAYFINDER_ACCOUNT_ID: ${{ vars.KIOSK_WAYFINDER_ACCOUNT_ID }}
-          VITE_WAYFINDER_VENUE_ID: ${{ vars.KIOSK_WAYFINDER_VENUE_ID }}
-          VITE_APP_NAME: ${{ vars.KIOSK_APP_NAME }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
